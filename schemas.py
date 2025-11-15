@@ -1,48 +1,36 @@
 """
-Database Schemas
+Database Schemas for WhatsApp-like app
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
+Each Pydantic model represents a collection in MongoDB. The collection name
+is the lowercase of the class name.
 
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Collections:
+- User -> "user"
+- Chat -> "chat"
+- Message -> "message"
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional
 
-# Example schemas (replace with your own):
 
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    """Users collection schema"""
+    name: str = Field(..., description="Display name")
+    avatar: Optional[str] = Field(None, description="Optional avatar URL")
+    status: Optional[str] = Field("Hey there! I am using VibeChat", description="Status message")
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class Chat(BaseModel):
+    """Chats collection schema"""
+    title: Optional[str] = Field(None, description="Optional chat title for groups")
+    participants: List[str] = Field(..., description="List of user IDs participating in the chat")
+    is_group: bool = Field(False, description="Whether this chat is a group chat")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+
+class Message(BaseModel):
+    """Messages collection schema"""
+    chat_id: str = Field(..., description="Chat ID this message belongs to")
+    sender_id: str = Field(..., description="User ID of the sender")
+    content: str = Field(..., description="Message text content")
+    type: str = Field("text", description="Message type: text, image, etc.")
